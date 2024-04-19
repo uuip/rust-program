@@ -15,19 +15,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pool = create_pool(&SETTING.explorer_db).await;
     let mut conn = pool.get().await?;
     let statement = conn
-        .prepare(
-            "SELECT * FROM transactions_pool where status_code=$1 ORDER BY created_at limit 10;",
-        )
+        .prepare("SELECT * FROM transactions_pool where status_code=$1 ORDER BY created_at;")
         .await?;
 
     let now = Local::now();
     let tr = conn.transaction().await?;
     let portal = tr.bind(&statement, &[&StatusCode::Success]).await?;
-    let rows = tr.query_portal_raw(&portal, 0).await?;
-    pin_mut!(rows);
-    while let Some(Ok(_row)) = rows.next().await {
-        // let o: TransactionPool = TransactionPool::from_row(&row);
-        // info!("{}", o.status_code);
+    loop {
+        let max_rows = 2;
+        let rst = tr.query_portal_raw(&portal, max_rows).await;
+        match rst {
+            Ok(rows) => {
+                let mut count = 0;
+                pin_mut!(rows);
+                while let Some(Ok(row)) = rows.next().await {
+                    count += 1;
+                    let o: TransactionPool = TransactionPool::from_row(&row);
+                    info!("{}", o.tag_id);
+                }
+                if count < max_rows {
+                    break;
+                }
+            }
+            Err(_) => break,
+        }
     }
     tr.commit().await?;
     info!(

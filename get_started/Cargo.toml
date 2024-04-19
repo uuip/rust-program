@@ -6,15 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = { version = "0.4.35", default-features = false, features = ["clock", "serde"] }
-chrono-tz = "0.8.6"
+chrono = { version = "0.4.38", default-features = false, features = ["clock", "serde"] }
+chrono-tz = "0.9.0"
 display_json = "0.2.1"
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.115"
+serde = { version = "1.0.198", features = ["derive"] }
+serde_json = "1.0.116"
 yaml-rust2 = "0.8"
 glob = "0.3.1"
-anyhow = "1.0.81"
+anyhow = "1.0.82"
 calamine = "0.24.0"
-rust_xlsxwriter = "0.64.1"
+rust_xlsxwriter = "0.64.2"
 rand = "0.8.5"
 log = {workspace = true}
