@@ -1,0 +1,22 @@
+[package]
+name = "write_excel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fastrand = "2.1.0"
+itertools = "0.13.0"
+ndarray = { version = "0.15.6",features = ["rayon"] }
+chrono = { version = "0.4.38", default-features = false, features = ["clock", "serde"] }
+
+simple_excel_writer = "0.2.0"
+rust_xlsxwriter = { version = "0.70.0", features = ["zlib","ryu"] }
+
+#edit-xlsx = "0.4.5"
+#umya-spreadsheet = "2.0.0"
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
+opt-level = "z"
