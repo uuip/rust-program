@@ -34,8 +34,7 @@ pub mod db {
 }
 
 pub mod logger {
-    use std::io::Write;
-
+    #[cfg(feature = "env_logger")]
     use chrono::Local;
     #[cfg(feature = "env_logger")]
     use env_logger::fmt::style::Color;
@@ -44,7 +43,12 @@ pub mod logger {
         colored_opt_format, opt_format, Cleanup, Criterion, Duplicate, FileSpec, FlexiLoggerError,
         LoggerHandle, Naming, WriteMode,
     };
-    use log::{Level, LevelFilter};
+    #[cfg(feature = "env_logger")]
+    use log::Level;
+    #[cfg(any(feature = "env_logger", feature = "file-logger"))]
+    use log::LevelFilter;
+    #[cfg(feature = "env_logger")]
+    use std::io::Write;
     // RUST_LOG=error, ["OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"]
     // RUST_LOG=error,hello=warn
     #[cfg(feature = "env_logger")]
@@ -110,7 +114,7 @@ pub mod logger {
         use tracing_subscriber::fmt::time::ChronoLocal;
         let timer = ChronoLocal::new("%Y-%m-%d %H:%M:%S%.3f%:z".to_string());
 
-        // tracing_appender当前版本未实现按文件大小切割，只能按日期
+        // tracing_appender 只能按日期切割
         // use tracing_appender::rolling::Rotation;
         // let file_appender = tracing_appender::rolling::Builder::new()
         //     .filename_prefix("thisapp")
@@ -118,7 +122,7 @@ pub mod logger {
         //     .rotation(Rotation::DAILY)
         //     .build(".").unwrap();
 
-        // tracing_rolling_file 扩展tracing_appender分割条件，支持文件大小
+        // tracing_rolling_file 按文件大小切割
         use tracing_rolling_file::{RollingConditionBase, RollingFileAppender};
         let file_appender = RollingFileAppender::new(
             "./thisapp",
