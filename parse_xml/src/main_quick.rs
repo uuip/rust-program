@@ -11,11 +11,11 @@ struct Version {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let rsp = reqwest::get("https://linearmouse.app/appcast.xml")
+    let rsp = reqwest::get("https://releases.eggerapps.at/postico2/appcast.xml?update_channel=2")
         .await?
         .text()
         .await?;
-    let mut reader = Reader::from_str(rsp.as_str());
+    let mut reader = Reader::from_str(&rsp);
     reader.config_mut().trim_text(true);
 
     let mut versions: Vec<Version> = vec![];

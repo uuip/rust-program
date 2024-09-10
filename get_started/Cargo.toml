@@ -7,17 +7,17 @@ edition = "2021"
 
 [dependencies]
 chrono = { version = "0.4.38", default-features = false, features = ["std", "clock", "serde"] }
-chrono-tz = "0.9.0"
+chrono-tz = "0.10.0"
 display_json = "0.2.1"
-serde = { version = "1.0.204", features = ["derive"] }
-serde_json = "1.0.120"
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
 yaml-rust2 = "0.8"
 glob = "0.3.1"
-anyhow = "1.0.86"
+anyhow = "1.0.87"
 calamine = "0.25.0"
-rust_xlsxwriter = { version = "0.71.0", features = ["zlib","ryu"] }
+rust_xlsxwriter = { version = "0.75.0", features = ["zlib","ryu"] }
 rand = "0.8.5"
 log = {workspace = true}
-fastrand = "2.1.0"
+fastrand = "2.1.1"
 itertools = "0.13.0"
-ndarray = { version = "0.15.6",features = ["rayon"] }
+ndarray = { version = "0.16.1",features = ["rayon"] }

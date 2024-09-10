@@ -46,7 +46,6 @@ pub mod kinds {
     ///
     /// [`Pool`]: super::Pool
     #[derive(Clone, Copy, Debug)]
-    #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
     pub struct PoolConfig {
         /// Maximum size of the [`Pool`].
         ///

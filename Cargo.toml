@@ -1,10 +1,10 @@
 [workspace]
 members = [
     "common",
+    "parse_xml",
+    "get_started",
+    "pg_sql",
     "playground",
-#    "get_started",
-#    "pg_sql",
-#    "write_excel",
 ]
 resolver = "2"
 
@@ -23,8 +23,8 @@ chrono = { version = "0.4.38", default-features = false, features = [
     "clock",
     "serde",
 ] }
-serde = { version = "1.0.204", features = ["derive"] }
-serde_json = "1.0.120"
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
 
 [workspace.lints.rust]
 #unused_imports = "allow"
