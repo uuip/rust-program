@@ -7,9 +7,7 @@ edition = "2021"
 
 [dependencies]
 log = { workspace = true }
-common = { path = "../common", features = ["tracing"] }
-uuid = { version = "1.10.0", features = ["v4", "fast-rng"] }
-
+common = { path = "../common", features = ["env_logger"] }
 
 [lints]
 workspace = true
