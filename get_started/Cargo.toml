@@ -13,9 +13,9 @@ serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
 yaml-rust2 = "0.8"
 glob = "0.3.1"
-anyhow = "1.0.87"
+anyhow = "1.0.88"
 calamine = "0.25.0"
-rust_xlsxwriter = { version = "0.75.0", features = ["zlib","ryu"] }
+rust_xlsxwriter = { version = "0.76.0", features = ["zlib","ryu"] }
 rand = "0.8.5"
 log = {workspace = true}
 fastrand = "2.1.1"
