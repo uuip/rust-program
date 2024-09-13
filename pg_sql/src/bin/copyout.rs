@@ -1,16 +1,16 @@
 use chrono::Local;
 use futures_util::{pin_mut, StreamExt};
 use log::info;
-use once_cell::sync::Lazy;
+use std::sync::OnceLock;
 use tokio_postgres::binary_copy::BinaryCopyOutStream;
 use tokio_postgres::types::Type;
 
 use common::{create_pool, init_logger, Setting};
 
-static SETTING: Lazy<Setting, fn() -> Setting> = Lazy::new(Setting::init);
-
+static SETTING: OnceLock<Setting> = OnceLock::new();
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let setting = SETTING.get_or_init(Setting::init);
     init_logger();
     let fields = [
         "block_number",
@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     let now = Local::now();
-    let pool = create_pool(&SETTING.db).await;
+    let pool = create_pool(&setting.db).await;
     let mut conn = pool.get().await?;
     let statement = conn
         .prepare(&format!(
