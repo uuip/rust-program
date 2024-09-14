@@ -6,7 +6,9 @@ use sqlx::postgres::{PgPoolOptions, Postgres};
 use sqlx::FromRow;
 use std::sync::OnceLock;
 
-use common::{init_logger, Setting};
+use logging::init_logger;
+use setting::Setting;
+
 static SETTING: OnceLock<Setting> = OnceLock::new();
 #[derive(Clone, Debug, Deserialize, Serialize, FromRow)]
 pub struct Transaction {

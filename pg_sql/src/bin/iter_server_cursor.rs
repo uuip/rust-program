@@ -2,7 +2,9 @@ use log::{info, warn};
 use std::sync::OnceLock;
 use tokio_postgres::NoTls;
 
-use common::{init_logger, Setting};
+use logging::init_logger;
+use setting::Setting;
+
 static SETTING: OnceLock<Setting> = OnceLock::new();
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {

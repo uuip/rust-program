@@ -4,7 +4,8 @@ use std::sync::OnceLock;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::NoTls;
 
-use common::{init_logger, Setting};
+use logging::init_logger;
+use setting::Setting;
 
 static SETTING: OnceLock<Setting> = OnceLock::new();
 #[tokio::main]

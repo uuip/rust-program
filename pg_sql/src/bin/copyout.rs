@@ -5,7 +5,9 @@ use std::sync::OnceLock;
 use tokio_postgres::binary_copy::BinaryCopyOutStream;
 use tokio_postgres::types::Type;
 
-use common::{create_pool, init_logger, Setting};
+use connection::create_pool;
+use logging::init_logger;
+use setting::Setting;
 
 static SETTING: OnceLock<Setting> = OnceLock::new();
 #[tokio::main]

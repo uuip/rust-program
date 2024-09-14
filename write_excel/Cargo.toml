@@ -1,0 +1,19 @@
+[package]
+name = "write_excel"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = {workspace = true}
+calamine = "0.25.0"
+rust_xlsxwriter = { version = "0.76.0", features = ["zlib", "ryu"] }
+chrono = {workspace = true}
+fastrand = "2.1.1"
+ndarray = { version = "0.16.1", features = ["rayon"] }
+
+[lints]
+workspace = true

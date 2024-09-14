@@ -3,8 +3,10 @@ use futures_util::{pin_mut, StreamExt};
 use log::info;
 use std::sync::OnceLock;
 
-use common::model::{FromRow, StatusCode, TransactionPool};
-use common::{create_pool, init_logger, Setting};
+use connection::create_pool;
+use logging::init_logger;
+use model::{FromRow, StatusCode, TransactionPool};
+use setting::Setting;
 
 static SETTING: OnceLock<Setting> = OnceLock::new();
 
@@ -13,7 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let setting = SETTING.get_or_init(Setting::init);
     init_logger();
 
-    let pool = create_pool(&setting.explorer_db).await;
+    let pool = create_pool(setting.explorer_db.as_ref().unwrap()).await;
     let mut conn = pool.get().await?;
     let statement = conn
         .prepare("SELECT * FROM transactions_pool where status_code=$1 ORDER BY created_at;")

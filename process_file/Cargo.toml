@@ -1,0 +1,16 @@
+[package]
+name = "process_file"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = {workspace = true}
+yaml-rust2 = "0.8"
+glob = "0.3.1"
+
+[lints]
+workspace = true
