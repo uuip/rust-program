@@ -7,6 +7,9 @@ homepage.workspace = true
 repository.workspace = true
 license.workspace = true
 
+[dependencies.eyre]
+version = "0.6.12"
+
 [dependencies.deadpool-postgres]
 version = "0.14.0"
 

@@ -7,6 +7,7 @@ use chrono::{DateTime, Utc};
 pub use postgres_from_row::FromRow;
 use tokio_postgres::types::private::BytesMut;
 use tokio_postgres::types::{to_sql_checked, FromSql, IsNull, ToSql, Type};
+
 #[cfg(feature = "enum")]
 use {
     duplicate::duplicate_item,
@@ -40,7 +41,7 @@ impl Display for StatusCode {
 impl FromSql<'_> for StatusCode {
     fn from_sql(ty: &Type, raw: &[u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
         let v = i32::from_sql(ty, raw)?;
-        Self::try_from(v).map_err(|e| e.into())
+        Self::try_from(v).map_err(Into::into)
     }
     fn accepts(_ty: &Type) -> bool {
         true
@@ -97,7 +98,7 @@ pub enum StatusChoice {
 #[duplicate_item(type_name; [TokenCode]; [StatusChoice])]
 impl FromSql<'_> for type_name {
     fn from_sql(_ty: &Type, raw: &[u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
-        Self::from_str(std::str::from_utf8(raw)?).map_err(|e| e.into())
+        Self::from_str(std::str::from_utf8(raw)?).map_err(Into::into)
     }
 
     fn accepts(_ty: &Type) -> bool {
@@ -112,7 +113,7 @@ impl ToSql for type_name {
     where
         Self: Sized,
     {
-        format!("{}", self).to_sql(ty, out)
+        self.to_string().to_sql(ty, out)
     }
 
     fn accepts(_ty: &Type) -> bool

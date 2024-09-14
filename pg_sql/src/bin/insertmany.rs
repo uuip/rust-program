@@ -86,7 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect::<Vec<String>>()
         .join(",");
 
-    let pool = create_pool(&setting.db).await;
+    let pool = create_pool(&setting.db).await?;
     let mut conn = pool.get().await?;
 
     let tr = conn.transaction().await?;

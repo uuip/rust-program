@@ -2,17 +2,17 @@
 members = [
     "setting",
     "playground",
-#    "logging",
-#    "schemas",
-#    "connection",
-#    "pg_model",
-#    "pg_sql",
-#    "parse_xml",
-#    "data_type",
-#    "write_excel",
-#    "process_file",
-#    "datetime",
-#    "use_rocksdb",
+    "logging",
+    "schemas",
+    "connection",
+    "pg_model",
+    "pg_sql",
+    "parse_xml",
+    "data_type",
+    "write_excel",
+    "process_file",
+    "datetime",
+    "use_rocksdb",
 ]
 resolver = "2"
 

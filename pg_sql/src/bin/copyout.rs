@@ -52,7 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     let now = Local::now();
-    let pool = create_pool(&setting.db).await;
+    let pool = create_pool(&setting.db).await?;
     let mut conn = pool.get().await?;
     let statement = conn
         .prepare(&format!(

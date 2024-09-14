@@ -1,29 +1,17 @@
-#[cfg(feature = "file-logger")]
-pub use self::logger::init_file_logger;
 #[cfg(feature = "env_logger")]
-pub use self::logger::init_logger;
+pub use self::env_logger::init_logger;
+#[cfg(feature = "file-logger")]
+pub use self::file_logger::init_file_logger;
 #[cfg(feature = "tracing")]
-pub use self::logger::init_tracing_logger;
+pub use self::tracing::init_tracing_logger;
 
-pub mod logger {
-    #[cfg(feature = "env_logger")]
+#[cfg(feature = "env_logger")]
+mod env_logger {
     use chrono::Local;
-    #[cfg(feature = "env_logger")]
     use env_logger::fmt::style::Color;
-    #[cfg(feature = "file-logger")]
-    use flexi_logger::{
-        colored_opt_format, opt_format, Cleanup, Criterion, Duplicate, FileSpec, FlexiLoggerError,
-        LoggerHandle, Naming, WriteMode,
-    };
-    #[cfg(feature = "env_logger")]
-    use log::Level;
-    #[cfg(any(feature = "env_logger", feature = "file-logger"))]
-    use log::LevelFilter;
-    #[cfg(feature = "env_logger")]
+    use log::{Level, LevelFilter};
     use std::io::Write;
-    // RUST_LOG=error, ["OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"]
-    // RUST_LOG=error,hello=warn
-    #[cfg(feature = "env_logger")]
+
     pub fn init_logger() {
         env_logger::builder()
             .filter_level(LevelFilter::Debug)
@@ -45,8 +33,15 @@ pub mod logger {
             })
             .init();
     }
+}
 
-    #[cfg(feature = "file-logger")]
+#[cfg(feature = "file-logger")]
+mod file_logger {
+    use flexi_logger::{
+        colored_opt_format, opt_format, Cleanup, Criterion, Duplicate, FileSpec, FlexiLoggerError,
+        LoggerHandle, Naming, WriteMode,
+    };
+    use log::LevelFilter;
     pub fn init_file_logger() -> Result<LoggerHandle, FlexiLoggerError> {
         // WriteMode::BufferAndFlush 需要主进程保持LoggerHandle存活, let _l = init_file_logger();
         // 不能使用 let _ = ...
@@ -68,12 +63,13 @@ pub mod logger {
             .format_for_stdout(colored_opt_format)
             .start()
     }
+}
 
-    #[cfg(feature = "tracing")]
+#[cfg(feature = "tracing")]
+mod tracing {
+    use tracing_subscriber::fmt::writer::MakeWriterExt;
+    use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
     pub fn init_tracing_logger() -> tracing_appender::non_blocking::WorkerGuard {
-        use tracing_subscriber::fmt::writer::MakeWriterExt;
-        use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
-
         // 使用 time 库
         // use tracing_subscriber::fmt::time::OffsetTime;
         // use time::macros::format_description;

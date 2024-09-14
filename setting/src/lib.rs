@@ -18,12 +18,8 @@ impl Setting {
         let topic = get_env("PULSAR_TOPIC");
         let explorer_db = get_env("EXPLORER_DB");
         let db = get_env("DB_URL").expect("DB_URL not set");
-        let rpc_list = if let Some(s) = get_env("rpc_list") {
-            let v = s.split(',').map(str::to_string).collect::<Vec<String>>();
-            Some(v)
-        } else {
-            None
-        };
+        let rpc_list =
+            get_env("rpc_list").map(|s| s.split(',').map(str::to_string).collect::<Vec<String>>());
 
         Self {
             pulsar_addr,
