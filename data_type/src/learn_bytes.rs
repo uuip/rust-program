@@ -39,6 +39,6 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
         "run time: {}s",
         Local::now().signed_duration_since(now).num_seconds()
     );
-    debug!("this id debug");
+    debug!("this is debug");
     Ok(())
 }

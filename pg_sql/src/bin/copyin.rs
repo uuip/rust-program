@@ -108,7 +108,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     pin_mut!(writer);
 
     for _ in 0..10 {
-        let data = make_data().unwrap();
+        let data = make_data()?;
         let m: TransactionPoolInsert = serde_json::from_value(data).unwrap();
         let params = [
             &m.block_number as &(dyn ToSql + Sync),

@@ -10,6 +10,5 @@ pub async fn create_pool(db_url: &str) -> Result<Pool> {
         recycling_method: RecyclingMethod::Fast,
     };
     let mgr = Manager::from_config(pg_config, NoTls, mgr_config);
-    let p = Pool::builder(mgr).max_size(100).build()?;
-    Ok(p)
+    Pool::builder(mgr).max_size(100).build().map_err(Into::into)
 }
