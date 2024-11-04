@@ -12,7 +12,7 @@ struct Version {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let rsp = reqwest::get("https://releases.eggerapps.at/postico2/appcast.xml?update_channel=2")
+    let rsp = reqwest::get("https://www.macbartender.com/B2/updates/AppcastB5.xml")
         .await?
         .text()
         .await?;
@@ -28,13 +28,13 @@ fn parse_appcast(text: &str) -> Result<Version> {
         .namespaces()
         .find(|ns| ns.name() == Some("sparkle"))
         .map(|t| t.uri());
-
+    println!("{:?}",3333);
     let mut versions: Vec<Version> = doc
         .descendants()
         .filter(|e| e.has_tag_name("item"))
         .filter_map(|item| parse_item(item, sparkle).ok())
         .collect();
-
+    println!("{:?}",versions);
     versions.sort_by(|a, b| a.pub_date.cmp(&b.pub_date));
     versions
         .into_iter()
@@ -103,6 +103,8 @@ fn find_sparkle_text(item: &Node, tag: &str, ns: &str) -> Option<String> {
 fn parse_dt(pub_date: &str) -> Result<DateTime<Utc>, ParseError> {
     DateTime::parse_from_rfc3339(pub_date)
         .or_else(|_| DateTime::parse_from_rfc2822(pub_date))
+        .or_else(|_| DateTime::parse_from_str(pub_date, "%d, %a %b %Y %H:%M:%S %z"))
+        .or_else(|_| DateTime::parse_from_str(pub_date, "%B %d, %Y %H:%M:%S %z"))
         .map(|d| d.to_utc())
         .or_else(|_| {
             NaiveDateTime::parse_from_str(pub_date, "%Y-%m-%d %H:%M:%S").map(|d| d.and_utc())

@@ -7,10 +7,10 @@ edition = "2021"
 
 [dependencies]
 eyre = "0.6.12"
-once_cell = "1.19.0"
+once_cell = "1.20.2"
 tokio = { version = "1", features = ["full"] }
 futures = "0"
-anyhow = "1.0.89"
+anyhow = "1.0.92"
 
 [lints]
 workspace = true
