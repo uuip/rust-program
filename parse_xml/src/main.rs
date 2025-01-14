@@ -28,13 +28,13 @@ fn parse_appcast(text: &str) -> Result<Version> {
         .namespaces()
         .find(|ns| ns.name() == Some("sparkle"))
         .map(|t| t.uri());
-    println!("{:?}",3333);
+    println!("{:?}", 3333);
     let mut versions: Vec<Version> = doc
         .descendants()
         .filter(|e| e.has_tag_name("item"))
         .filter_map(|item| parse_item(item, sparkle).ok())
         .collect();
-    println!("{:?}",versions);
+    println!("{:?}", versions);
     versions.sort_by(|a, b| a.pub_date.cmp(&b.pub_date));
     versions
         .into_iter()
