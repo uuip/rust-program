@@ -37,3 +37,8 @@ impl Count for User {
 //         write!(f, "name: {}",self.name)
 //     }
 // }
+
+// 两者在使用上没有实质区别，主要是风格选择：
+//
+//     struct S; 更常见，也是 Rust 社区推荐的风格
+//     struct S {} 与常规结构体声明的语法更一致
