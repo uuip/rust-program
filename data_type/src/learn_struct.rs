@@ -1,9 +1,8 @@
-use display_json::{DebugAsJsonPretty, DisplayAsJsonPretty};
 use serde::Serialize;
 
 use crate::learn_enum::Gender;
 
-#[derive(Serialize, DisplayAsJsonPretty, DebugAsJsonPretty)]
+#[derive(Serialize,Debug)]
 pub struct User {
     pub(crate) name: String,
     pub(crate) age: i32,

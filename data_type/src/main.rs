@@ -31,7 +31,7 @@ fn main() -> anyhow::Result<()> {
     println!("{}", serde_json::to_string(&data1)?);
     println!("{:?}", user1.gender.index());
     println!("{:?}", user1.summarize());
-    println!("{}", user1);
+    println!("{:?}", user1);
 
     println!("{}", true && false);
     thread::sleep(std::time::Duration::from_secs(0));

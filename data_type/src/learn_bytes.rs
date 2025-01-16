@@ -3,7 +3,7 @@ use std::error::Error;
 use byteorder::{BigEndian, ReadBytesExt};
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 use chrono::Local;
-use log::{debug, info};
+use log::info;
 
 use logging::init_logger;
 
