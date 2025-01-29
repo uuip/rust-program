@@ -1,5 +1,5 @@
 use chrono::Local;
-use futures_util::{pin_mut, StreamExt};
+use futures::{pin_mut, StreamExt};
 use log::info;
 use std::sync::OnceLock;
 use tokio_postgres::binary_copy::BinaryCopyOutStream;

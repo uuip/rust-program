@@ -1,4 +1,4 @@
-use futures_util::{pin_mut, TryStreamExt};
+use futures::{pin_mut, TryStreamExt};
 use log::{info, warn};
 use std::sync::OnceLock;
 use tokio_postgres::types::ToSql;

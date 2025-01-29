@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-use futures_util::TryStreamExt;
+use futures::TryStreamExt;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::{PgPoolOptions, Postgres};

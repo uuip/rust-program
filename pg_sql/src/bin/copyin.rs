@@ -1,6 +1,6 @@
 use chrono::Local;
 use chrono_tz::Asia::Tokyo;
-use futures_util::pin_mut;
+use futures::pin_mut;
 use log::info;
 use serde_json::{json, Value};
 use std::sync::OnceLock;
