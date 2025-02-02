@@ -52,7 +52,6 @@ fn write_file_line() {
     }
 }
 
-/// serde_yml crate
 fn read_yaml() -> anyhow::Result<()> {
     #[cfg(target_os = "windows")]
     let file = read_to_string(r"C:\Users\sharp\AppData\Local\Programs\clash_win\config.yaml")?;
