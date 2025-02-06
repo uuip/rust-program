@@ -1,53 +1,17 @@
-#[cfg(feature = "pg")]
-pub use self::db::create_pool;
-#[cfg(feature = "file-logger")]
-pub use self::logger::init_file_logger;
 #[cfg(feature = "env_logger")]
-pub use self::logger::init_logger;
+pub use self::env_logger::init_logger;
+#[cfg(feature = "file-logger")]
+pub use self::file_logger::init_file_logger;
 #[cfg(feature = "tracing")]
-pub use self::logger::init_tracing_logger;
-pub use self::setting::Setting;
+pub use self::tracing::init_tracing_logger;
 
-#[cfg(feature = "web3")]
-pub mod erc20;
-#[cfg(feature = "pg-with-model")]
-pub mod model;
-#[cfg(feature = "pulsar")]
-pub mod schema;
-mod setting;
-
-#[cfg(feature = "pg")]
-pub mod db {
-    use std::str::FromStr;
-
-    use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
-    use tokio_postgres::NoTls;
-
-    pub async fn create_pool(db_url: &str) -> Pool {
-        let pg_config = tokio_postgres::Config::from_str(db_url).unwrap();
-        let mgr_config = ManagerConfig {
-            recycling_method: RecyclingMethod::Fast,
-        };
-        let mgr = Manager::from_config(pg_config, NoTls, mgr_config);
-        Pool::builder(mgr).max_size(100).build().unwrap()
-    }
-}
-
-pub mod logger {
+#[cfg(feature = "env_logger")]
+mod env_logger {
+    use chrono::Local;
+    use env_logger::fmt::style::Color;
+    use log::{Level, LevelFilter};
     use std::io::Write;
 
-    use chrono::Local;
-    #[cfg(feature = "env_logger")]
-    use env_logger::fmt::style::Color;
-    #[cfg(feature = "file-logger")]
-    use flexi_logger::{
-        colored_opt_format, opt_format, Cleanup, Criterion, Duplicate, FileSpec, FlexiLoggerError,
-        LoggerHandle, Naming, WriteMode,
-    };
-    use log::{Level, LevelFilter};
-    // RUST_LOG=error, ["OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"]
-    // RUST_LOG=error,hello=warn
-    #[cfg(feature = "env_logger")]
     pub fn init_logger() {
         env_logger::builder()
             .filter_level(LevelFilter::Debug)
@@ -69,8 +33,15 @@ pub mod logger {
             })
             .init();
     }
+}
 
-    #[cfg(feature = "file-logger")]
+#[cfg(feature = "file-logger")]
+mod file_logger {
+    use flexi_logger::{
+        colored_opt_format, opt_format, Cleanup, Criterion, Duplicate, FileSpec, FlexiLoggerError,
+        LoggerHandle, Naming, WriteMode,
+    };
+    use log::LevelFilter;
     pub fn init_file_logger() -> Result<LoggerHandle, FlexiLoggerError> {
         // WriteMode::BufferAndFlush 需要主进程保持LoggerHandle存活, let _l = init_file_logger();
         // 不能使用 let _ = ...
@@ -92,12 +63,13 @@ pub mod logger {
             .format_for_stdout(colored_opt_format)
             .start()
     }
+}
 
-    #[cfg(feature = "tracing")]
+#[cfg(feature = "tracing")]
+mod tracing {
+    use tracing_subscriber::fmt::writer::MakeWriterExt;
+    use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
     pub fn init_tracing_logger() -> tracing_appender::non_blocking::WorkerGuard {
-        use tracing_subscriber::fmt::writer::MakeWriterExt;
-        use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt};
-
         // 使用 time 库
         // use tracing_subscriber::fmt::time::OffsetTime;
         // use time::macros::format_description;
@@ -110,7 +82,7 @@ pub mod logger {
         use tracing_subscriber::fmt::time::ChronoLocal;
         let timer = ChronoLocal::new("%Y-%m-%d %H:%M:%S%.3f%:z".to_string());
 
-        // tracing_appender当前版本未实现按文件大小切割，只能按日期
+        // tracing_appender 只能按日期切割
         // use tracing_appender::rolling::Rotation;
         // let file_appender = tracing_appender::rolling::Builder::new()
         //     .filename_prefix("thisapp")
@@ -118,7 +90,7 @@ pub mod logger {
         //     .rotation(Rotation::DAILY)
         //     .build(".").unwrap();
 
-        // tracing_rolling_file 扩展tracing_appender分割条件，支持文件大小
+        // tracing_rolling_file 按文件大小切割
         use tracing_rolling_file::{RollingConditionBase, RollingFileAppender};
         let file_appender = RollingFileAppender::new(
             "./thisapp",

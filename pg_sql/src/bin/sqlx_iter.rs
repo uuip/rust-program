@@ -1,14 +1,15 @@
 #![allow(non_snake_case)]
-
-use futures_util::TryStreamExt;
+use futures::TryStreamExt;
 use log::{info, warn};
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::{PgPoolOptions, Postgres};
 use sqlx::FromRow;
+use std::sync::OnceLock;
 
-use common::{init_logger, Setting};
-static SETTING: Lazy<Setting, fn() -> Setting> = Lazy::new(Setting::init);
+use logging::init_logger;
+use setting::Setting;
+
+static SETTING: OnceLock<Setting> = OnceLock::new();
 #[derive(Clone, Debug, Deserialize, Serialize, FromRow)]
 pub struct Transaction {
     pub id: i64,
@@ -24,12 +25,13 @@ pub struct Transaction {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let setting = SETTING.get_or_init(Setting::init);
     init_logger();
 
     let pool = PgPoolOptions::new()
         .max_connections(10)
         .min_connections(1)
-        .connect(&SETTING.db)
+        .connect(&setting.db)
         .await?;
 
     info!("run with sqlx");

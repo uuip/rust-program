@@ -7,7 +7,8 @@ use chrono::{DateTime, Utc};
 pub use postgres_from_row::FromRow;
 use tokio_postgres::types::private::BytesMut;
 use tokio_postgres::types::{to_sql_checked, FromSql, IsNull, ToSql, Type};
-#[cfg(feature = "pg-with-enum")]
+
+#[cfg(feature = "enum")]
 use {
     duplicate::duplicate_item,
     num_enum::{IntoPrimitive, TryFromPrimitive},
@@ -15,7 +16,7 @@ use {
     serde_with::{DeserializeFromStr, SerializeDisplay},
 };
 
-#[cfg(feature = "pg-with-enum")]
+#[cfg(feature = "enum")]
 #[derive(
     Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, IntoPrimitive, TryFromPrimitive,
 )]
@@ -28,7 +29,7 @@ pub enum StatusCode {
     Retrying = 100,
 }
 
-#[cfg(feature = "pg-with-enum")]
+#[cfg(feature = "enum")]
 impl Display for StatusCode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let v: i32 = self.clone().into();
@@ -36,18 +37,18 @@ impl Display for StatusCode {
     }
 }
 
-#[cfg(feature = "pg-with-enum")]
+#[cfg(feature = "enum")]
 impl FromSql<'_> for StatusCode {
     fn from_sql(ty: &Type, raw: &[u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
         let v = i32::from_sql(ty, raw)?;
-        Self::try_from(v).map_err(|e| e.into())
+        Self::try_from(v).map_err(Into::into)
     }
     fn accepts(_ty: &Type) -> bool {
         true
     }
 }
 
-#[cfg(feature = "pg-with-enum")]
+#[cfg(feature = "enum")]
 impl ToSql for StatusCode {
     fn to_sql(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn Error + Sync + Send>>
     where
@@ -68,7 +69,7 @@ impl ToSql for StatusCode {
 }
 
 /// serde_with 将strum::Display与serde关联起来。
-#[cfg(feature = "pg-with-enum")]
+#[cfg(feature = "enum")]
 #[derive(Clone, Debug, SerializeDisplay, DeserializeFromStr, strum::Display, strum::EnumString)]
 #[strum(serialize_all = "UPPERCASE")]
 pub enum TokenCode {
@@ -81,7 +82,7 @@ pub enum TokenCode {
     KRW,
 }
 
-#[cfg(feature = "pg-with-enum")]
+#[cfg(feature = "enum")]
 #[derive(Clone, Debug, SerializeDisplay, DeserializeFromStr, strum::Display, strum::EnumString)]
 #[strum(serialize_all = "lowercase")]
 pub enum StatusChoice {
@@ -93,11 +94,11 @@ pub enum StatusChoice {
     Suspend,
 }
 
-#[cfg(feature = "pg-with-enum")]
+#[cfg(feature = "enum")]
 #[duplicate_item(type_name; [TokenCode]; [StatusChoice])]
 impl FromSql<'_> for type_name {
     fn from_sql(_ty: &Type, raw: &[u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
-        Self::from_str(std::str::from_utf8(raw)?).map_err(|e| e.into())
+        Self::from_str(std::str::from_utf8(raw)?).map_err(Into::into)
     }
 
     fn accepts(_ty: &Type) -> bool {
@@ -105,14 +106,14 @@ impl FromSql<'_> for type_name {
     }
 }
 
-#[cfg(feature = "pg-with-enum")]
+#[cfg(feature = "enum")]
 #[duplicate_item(type_name; [TokenCode]; [StatusChoice])]
 impl ToSql for type_name {
     fn to_sql(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn Error + Sync + Send>>
     where
         Self: Sized,
     {
-        format!("{}", self).to_sql(ty, out)
+        self.to_string().to_sql(ty, out)
     }
 
     fn accepts(_ty: &Type) -> bool
@@ -132,9 +133,9 @@ pub struct TransactionPool {
     pub request_time: Option<DateTime<Utc>>,
     pub success_time: Option<DateTime<Utc>>,
     pub block_number: Option<i64>,
-    #[cfg(feature = "pg-with-enum")]
+    #[cfg(feature = "enum")]
     pub status: StatusChoice,
-    #[cfg(not(feature = "pg-with-enum"))]
+    #[cfg(not(feature = "enum"))]
     pub status: String,
     pub status_code: i32,
     pub fail_reason: Option<String>,

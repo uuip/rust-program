@@ -1,7 +1,6 @@
-use display_json::{DebugAsJsonPretty, DisplayAsJsonPretty};
 use serde::Serialize;
 
-#[derive(Serialize, DisplayAsJsonPretty, DebugAsJsonPretty, Copy, Clone)]
+#[derive(Serialize, Debug, Copy, Clone)]
 pub(crate) enum Gender {
     Female,
     Male,

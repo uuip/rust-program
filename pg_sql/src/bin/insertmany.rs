@@ -1,16 +1,18 @@
 use chrono::Local;
 use chrono_tz::Asia::Tokyo;
-use futures_util::future;
+use futures::future;
 use log::info;
-use once_cell::sync::Lazy;
 use serde_json::{json, Value};
+use std::sync::OnceLock;
 use tokio_postgres::types::ToSql;
 use uuid::Uuid;
 
-use common::model::TransactionPoolInsert;
-use common::{create_pool, init_logger, Setting};
+use connection::create_pool;
+use logging::init_logger;
+use model::TransactionPoolInsert;
+use setting::Setting;
 
-static SETTING: Lazy<Setting, fn() -> Setting> = Lazy::new(Setting::init);
+static SETTING: OnceLock<Setting> = OnceLock::new();
 
 fn make_data() -> Result<Value, Box<dyn std::error::Error>> {
     let t = chrono::Utc::now().with_timezone(&Tokyo);
@@ -51,6 +53,7 @@ fn make_data() -> Result<Value, Box<dyn std::error::Error>> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let setting = SETTING.get_or_init(Setting::init);
     init_logger();
     let mansy_objs = (0..10)
         .map(|_| {
@@ -83,7 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect::<Vec<String>>()
         .join(",");
 
-    let pool = create_pool(&SETTING.db).await;
+    let pool = create_pool(&setting.db).await?;
     let mut conn = pool.get().await?;
 
     let tr = conn.transaction().await?;

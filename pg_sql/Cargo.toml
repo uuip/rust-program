@@ -4,19 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-common = { path = "../common", features = ["pg-with-enum"] }
 log = { workspace = true }
 chrono = { workspace = true }
 serde_json = { workspace = true }
-chrono-tz = "0.9.0"
-anyhow = "1.0.82"
-once_cell = "1.19.0"
-tokio = { version = "1.37.0", features = ["full"] }
-futures-util = "0.3.30"
-tokio-postgres = { version = "0.7.10", features = ["with-chrono-0_4", "with-serde_json-1"] }
-uuid = { version = "1.8.0", features = ["v4", "fast-rng"] }
+chrono-tz = { workspace = true }
 serde = { workspace = true }
-sqlx = { version = "0.7.4", features = ["runtime-tokio-native-tls", "postgres", "chrono"] }
+tokio = { version = "1.43.0", features = ["full"] }
+futures = "0.3.31"
+tokio-postgres = { version = "0.7.12", features = ["with-chrono-0_4", "with-serde_json-1"] }
+uuid = { version = "1.12.1", features = ["v4", "fast-rng"] }
+sqlx = { version = "0.8.3", features = ["runtime-tokio", "postgres", "chrono"] }
+
+setting = { path = "../setting" }
+connection = { path = "../connection" }
+logging = { path = "../logging" }
+model = { path = "../pg_model",features = ["enum"] }
 
 [target.'cfg(unix)'.dependencies]
 

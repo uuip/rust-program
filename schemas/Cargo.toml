@@ -1,0 +1,26 @@
+[package]
+name = "schemas"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+web3 = ["dep:ethers"]
+pulsar = ["dep:pulsar", "dep:schemars"]
+preserve_order = ["serde_json/preserve_order", "schemars?/preserve_order"]
+
+[dependencies]
+log = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+ethers = { version = "2.0.14", default-features = false, optional = true, features = [
+    "abigen",
+    "legacy",
+] }
+pulsar = { version = "6.3.0", default-features = false, optional = true, features = [
+    "tokio-runtime",
+    "compression",
+] }
+schemars = { version = "0.8.21", optional = true }

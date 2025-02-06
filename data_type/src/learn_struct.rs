@@ -1,9 +1,8 @@
-use display_json::{DebugAsJsonPretty, DisplayAsJsonPretty};
 use serde::Serialize;
 
 use crate::learn_enum::Gender;
 
-#[derive(Serialize, DisplayAsJsonPretty, DebugAsJsonPretty)]
+#[derive(Serialize, Debug)]
 pub struct User {
     pub(crate) name: String,
     pub(crate) age: i32,
@@ -37,3 +36,8 @@ impl Count for User {
 //         write!(f, "name: {}",self.name)
 //     }
 // }
+
+// 两者在使用上没有实质区别，主要是风格选择：
+//
+//     struct S; 更常见，也是 Rust 社区推荐的风格
+//     struct S {} 与常规结构体声明的语法更一致

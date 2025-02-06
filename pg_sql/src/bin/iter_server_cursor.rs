@@ -1,14 +1,17 @@
 use log::{info, warn};
-use once_cell::sync::Lazy;
+use std::sync::OnceLock;
 use tokio_postgres::NoTls;
 
-use common::{init_logger, Setting};
-static SETTING: Lazy<Setting, fn() -> Setting> = Lazy::new(Setting::init);
+use logging::init_logger;
+use setting::Setting;
+
+static SETTING: OnceLock<Setting> = OnceLock::new();
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let setting = SETTING.get_or_init(Setting::init);
     init_logger();
 
-    let (mut client, connection) = tokio_postgres::connect(&SETTING.db, NoTls).await?;
+    let (mut client, connection) = tokio_postgres::connect(&setting.db, NoTls).await?;
     tokio::spawn(async move {
         if let Err(e) = connection.await {
             eprintln!("connection error: {}", e);
