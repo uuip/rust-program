@@ -1,5 +1,5 @@
 [package]
-name = "process_file"
+name = "sys"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -8,8 +8,8 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-anyhow = {workspace = true}
-yaml-rust2 = "0.9"
+num_cpus = "1.16.0"
+sysinfo = "0.33.1"
 
 [lints]
 workspace = true

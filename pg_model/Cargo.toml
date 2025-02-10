@@ -10,13 +10,13 @@ license.workspace = true
 [dependencies]
 serde = { workspace = true }
 chrono = { workspace = true }
-tokio-postgres = { version = "0.7.12",  features = [
+tokio-postgres = { version = "0.7.13",  features = [
     "with-chrono-0_4",
     "with-serde_json-1",
 ] }
 postgres-from-row = { version = "0.5.2"}
 
-strum = { version = "0.26.3", features = ["derive"], optional = true }
+strum = { version = "0.27.0", features = ["derive"], optional = true }
 serde_with = { version = "3.12.0", optional = true }
 num_enum = { version = "0.7.3", optional = true }
 serde_repr = { version = "0.1.19", optional = true }

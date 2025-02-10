@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::learn_enum::Gender;
+use crate::r#enum::Gender;
 
 #[derive(Serialize, Debug)]
 pub struct User {

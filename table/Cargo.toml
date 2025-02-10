@@ -1,5 +1,5 @@
 [package]
-name = "process_file"
+name = "table"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -8,8 +8,7 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-anyhow = {workspace = true}
-yaml-rust2 = "0.9"
+comfy-table = "7.1.4"
 
 [lints]
 workspace = true

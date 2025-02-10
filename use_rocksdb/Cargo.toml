@@ -9,4 +9,4 @@ edition = "2021"
 fastrand = "2.3.0"
 rocksdb = "0.23.0"
 serde_json = { workspace = true }
-uuid = { version = "1.12.1", features = ["v4", "fast-rng"] }
+uuid = { version = "1.13.1", features = ["v4", "fast-rng"] }

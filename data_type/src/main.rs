@@ -1,21 +1,21 @@
 #![allow(dead_code)]
 
-use std::collections::{HashMap, HashSet};
+use log::info;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
-use std::thread;
 
-use log::info;
+use crate::r#enum::Gender;
+use crate::r#struct::{Count, User};
 
-use crate::learn_enum::Gender;
-use crate::learn_struct::{Count, User};
-
-mod learn_bytes;
-mod learn_enum;
-mod learn_random;
-mod learn_struct;
-mod ndarray_usage;
+mod bytes;
+mod collections;
+mod r#enum;
+mod ndarray;
+mod number;
+mod path;
 mod product;
+mod random;
+mod r#struct;
 
 #[allow(clippy::nonminimal_bool)]
 fn main() -> anyhow::Result<()> {
@@ -34,46 +34,11 @@ fn main() -> anyhow::Result<()> {
     println!("{:?}", user1);
 
     println!("{}", true && false);
-    thread::sleep(std::time::Duration::from_secs(0));
     let a = Box::new("33");
     println!("{}", (*a).type_name());
 
     info!("yyyzzz");
     Ok(())
-}
-
-fn learn_collections() {
-    let mut set: HashSet<&str> = HashSet::new();
-    set.insert("aaa");
-    set.insert("aaa");
-    println!("{:?}", set);
-    let set2: HashSet<&str> = ["bbb", "aaa"].into();
-    let rst = set.union(&set2).collect::<Vec<&&str>>();
-    println!("并集 {:?}", rst);
-    println!("交集 {:?}", set.intersection(&set2).collect::<Vec<&&str>>());
-    for item in set.iter() {
-        println!("{}", item)
-    }
-
-    let mut dict = HashMap::from([("key1", 2), ("key2", 22)]);
-    dict.entry("key3").or_insert(222);
-    dict.insert("key4", 2222);
-    println!("{:?}", dict);
-    for (k, v) in dict.iter() {
-        println!("{k}: {v}");
-    }
-}
-
-fn learn_sort() {
-    let mut arr = [111, 11, 1];
-    arr.sort_unstable();
-    println!("{:?}", arr);
-    let mut arr = [111.0, 11.0, 1.0];
-    arr.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-    println!("{:?}", arr);
-    let mut arr = ["ccc", "bbb", "aaa"];
-    arr.sort_unstable();
-    println!("{:?}", arr);
 }
 
 fn learn_concat() {

@@ -26,7 +26,7 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let mut buf = BytesMut::with_capacity(16);
     buf.put_u64(n as u64);
     // &[u8] -> num
-    let new_n = Bytes::from(buf.to_vec()).get_u64();
+    let new_n = buf.get_u64();
     info!("new_n={}, n_bytes={:?}", new_n, buf);
     // &[u8] -> num with byteorder
     let new_n = buf.as_ref().read_u64::<BigEndian>()?;

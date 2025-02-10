@@ -3,12 +3,13 @@
 use calamine::Reader;
 use chrono::Local;
 use ndarray::{Array2, Axis};
+use rust_xlsxwriter::*;
 use std::path::PathBuf;
 
 fn read_xlsx() -> anyhow::Result<()> {
     let mut workbook: calamine::Xlsx<_> =
         calamine::open_workbook(r"C:\Users\sharp\Desktop\data\2023-04-21-plan2-all-f11.xlsx")?;
-    let sheet = workbook.worksheet_range("全国").unwrap();
+    let sheet = workbook.worksheet_range("全国")?;
     for row in sheet.rows() {
         println!("{:?}", row)
     }
@@ -16,7 +17,7 @@ fn read_xlsx() -> anyhow::Result<()> {
 }
 
 fn write_xlsx() -> anyhow::Result<()> {
-    let mut workbook = rust_xlsxwriter::Workbook::new();
+    let mut workbook = Workbook::new();
     let sheet = workbook.add_worksheet();
     sheet.set_name("都放到")?;
     sheet.write(0, 0, "some文本")?;
@@ -41,43 +42,39 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         std::fs::remove_file(filename)?;
     }
 
-    // {
-    //     use simple_excel_writer::{Row, Workbook};
-    //
-    //     let now = Local::now();
-    //     let mut workbook = Workbook::create(filename);
-    //     let mut sheet = workbook.create_sheet("sheet");
-    //     workbook
-    //         .write_sheet(&mut sheet, |sheet_writer| {
-    //             let _ = data
-    //                 .axis_iter(Axis(0))
-    //                 .map(|r| sheet_writer.append_row(Row::from_iter(r.to_owned().into_iter())))
-    //                 .collect::<Vec<_>>();
-    //             Ok(())
-    //         })
-    //         .expect("write excel error!");
-    //     workbook.close().expect("close excel error!");
-    //     println!(
-    //         "simple_excel_writer用时{:.2?}秒",
-    //         Local::now().signed_duration_since(now).num_seconds()
-    //     );
-    // }
+    let now = Local::now();
+    let d = data.axis_iter(Axis(0)).map(|x| x.to_owned());
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    worksheet.write_row_matrix(0, 0, d)?;
+    workbook.save(filename)?;
 
-    {
-        use rust_xlsxwriter::*;
-
-        let now = Local::now();
-        let d = data.axis_iter(Axis(0)).map(|x| x.to_owned());
-        let mut workbook = Workbook::new();
-        let worksheet = workbook.add_worksheet();
-        worksheet.write_row_matrix(0, 0, d)?;
-        workbook.save(filename)?;
-
-        println!(
-            "rust_xlsxwriter用时{:.2?}秒",
-            Local::now().signed_duration_since(now).num_seconds()
-        );
-    }
+    println!(
+        "rust_xlsxwriter用时{:.2?}秒",
+        Local::now().signed_duration_since(now).num_seconds()
+    );
 
     Ok(())
 }
+
+// {
+//     use simple_excel_writer::{Row, Workbook};
+//
+//     let now = Local::now();
+//     let mut workbook = Workbook::create(filename);
+//     let mut sheet = workbook.create_sheet("sheet");
+//     workbook
+//         .write_sheet(&mut sheet, |sheet_writer| {
+//             let _ = data
+//                 .axis_iter(Axis(0))
+//                 .map(|r| sheet_writer.append_row(Row::from_iter(r.to_owned().into_iter())))
+//                 .collect::<Vec<_>>();
+//             Ok(())
+//         })
+//         .expect("write excel error!");
+//     workbook.close().expect("close excel error!");
+//     println!(
+//         "simple_excel_writer用时{:.2?}秒",
+//         Local::now().signed_duration_since(now).num_seconds()
+//     );
+// }

@@ -12,7 +12,7 @@ members = [
     "write_excel",
     "process_file",
     "datetime",
-    "use_rocksdb",
+    "use_rocksdb", "sys", "table", "lru_cache",
 ]
 resolver = "2"
 
