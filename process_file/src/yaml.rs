@@ -18,10 +18,10 @@ fn read_yaml() -> anyhow::Result<()> {
 
 fn write_yaml() -> anyhow::Result<()> {
     let input_string = "a: b\nc: d";
-    let yaml = YamlLoader::load_from_str(input_string).unwrap();
+    let yaml = YamlLoader::load_from_str(input_string)?;
 
     let mut output = String::new();
-    YamlEmitter::new(&mut output).dump(&yaml[0]).unwrap();
+    YamlEmitter::new(&mut output).dump(&yaml[0])?;
 
     assert_eq!(
         output,
