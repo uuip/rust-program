@@ -1,9 +1,9 @@
-use anyhow::{anyhow, Result};
-use chrono::{DateTime, NaiveDateTime, ParseError, Utc};
+use anyhow::{Result, anyhow};
+use chrono::{DateTime, FixedOffset, NaiveDateTime, ParseError, Utc};
 use roxmltree::{ExpandedName, Node};
 
 #[derive(Debug)]
-struct Version {
+struct AppItem {
     version: String,
     short_version: String,
     channel: String,
@@ -12,7 +12,7 @@ struct Version {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let rsp = reqwest::get("https://www.macbartender.com/B2/updates/AppcastB5.xml")
+    let rsp = reqwest::get("https://www.typora.io/download/dev_update.xml")
         .await?
         .text()
         .await?;
@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn parse_appcast(text: &str) -> Result<Version> {
+fn parse_appcast(text: &str) -> Result<AppItem> {
     let doc = roxmltree::Document::parse(text)?;
     let sparkle = doc
         .root_element()
@@ -29,7 +29,7 @@ fn parse_appcast(text: &str) -> Result<Version> {
         .find(|ns| ns.name() == Some("sparkle"))
         .map(|t| t.uri());
     println!("{:?}", 3333);
-    let mut versions: Vec<Version> = doc
+    let mut versions: Vec<AppItem> = doc
         .descendants()
         .filter(|e| e.has_tag_name("item"))
         .filter_map(|item| parse_item(item, sparkle).ok())
@@ -43,14 +43,15 @@ fn parse_appcast(text: &str) -> Result<Version> {
         .ok_or_else(|| anyhow!("Failed to parse version"))
 }
 
-fn parse_item(item: Node, sparkle: Option<&str>) -> Result<Version> {
-    let pub_date = find_text(&item, "pubDate").unwrap_or_default();
+fn parse_item(item: Node, sparkle: Option<&str>) -> Result<AppItem> {
+    let mut pub_date = find_text(&item, "pubDate").unwrap_or_default();
+    pub_date = pub_date.replace("Web", "Wed");
     let version1 = find_text(&item, "title").unwrap_or_default();
     let mut version2 = String::new();
     let mut version3 = String::new();
     let mut channel = String::from("release");
     let mut short_version = String::new();
-
+    println!("{:#?}", version1);
     if let Some(ns) = sparkle {
         channel = find_sparkle_text(&item, "channel", ns).unwrap_or_else(|| "release".to_string());
         version2 = find_sparkle_text(&item, ns, "version").unwrap_or_default();
@@ -77,11 +78,11 @@ fn parse_item(item: Node, sparkle: Option<&str>) -> Result<Version> {
         version1
     };
 
-    Ok(Version {
+    Ok(AppItem {
         version,
         short_version,
         channel,
-        pub_date: parse_dt(&pub_date)?,
+        pub_date: parse_dt(&pub_date).or_else(|_| Ok::<DateTime<Utc>, ParseError>(Utc::now()))?,
     })
 }
 
@@ -101,12 +102,21 @@ fn find_sparkle_text(item: &Node, tag: &str, ns: &str) -> Option<String> {
 }
 
 fn parse_dt(pub_date: &str) -> Result<DateTime<Utc>, ParseError> {
-    DateTime::parse_from_rfc3339(pub_date)
-        .or_else(|_| DateTime::parse_from_rfc2822(pub_date))
-        .or_else(|_| DateTime::parse_from_str(pub_date, "%d, %a %b %Y %H:%M:%S %z"))
-        .or_else(|_| DateTime::parse_from_str(pub_date, "%B %d, %Y %H:%M:%S %z"))
-        .map(|d| d.to_utc())
-        .or_else(|_| {
-            NaiveDateTime::parse_from_str(pub_date, "%Y-%m-%d %H:%M:%S").map(|d| d.and_utc())
-        })
+    type ParseFunc = for<'a> fn(&'a str) -> Result<DateTime<FixedOffset>, ParseError>;
+
+    let parsers: [ParseFunc; 4] = [
+        DateTime::parse_from_rfc3339,
+        DateTime::parse_from_rfc2822,
+        |s| DateTime::parse_from_str(s, "%d, %a %b %Y %H:%M:%S %z"),
+        |s| DateTime::parse_from_str(s, "%B %d, %Y %H:%M:%S %z"),
+    ];
+
+    for parser in &parsers {
+        match parser(pub_date) {
+            Ok(dt) => return Ok(dt.to_utc()),
+            Err(_) => continue,
+        }
+    }
+
+    NaiveDateTime::parse_from_str(pub_date, "%Y-%m-%d %H:%M:%S").map(|d| d.and_utc())
 }

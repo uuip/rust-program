@@ -1,7 +1,7 @@
 use std::thread::sleep;
 use std::time::Duration;
 
-use rocksdb::{DBCompactionStyle, DBCompressionType, Options, DB};
+use rocksdb::{DB, DBCompactionStyle, DBCompressionType, Options};
 use serde_json::json;
 use uuid::Uuid;
 

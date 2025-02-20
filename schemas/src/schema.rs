@@ -1,8 +1,8 @@
 use log::debug;
 use pulsar::{
-    producer, proto, DeserializeMessage, Error as PulsarError, Payload, SerializeMessage,
+    DeserializeMessage, Error as PulsarError, Payload, SerializeMessage, producer, proto,
 };
-use schemars::{schema_for, JsonSchema};
+use schemars::{JsonSchema, schema_for};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 

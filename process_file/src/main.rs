@@ -1,6 +1,6 @@
 mod yaml;
 
-use std::fs::{read_to_string, File};
+use std::fs::{File, read_to_string};
 use std::io::{BufRead, BufReader, LineWriter, Write};
 
 fn main() {

@@ -2,8 +2,8 @@
 use futures::TryStreamExt;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::{PgPoolOptions, Postgres};
 use sqlx::FromRow;
+use sqlx::postgres::{PgPoolOptions, Postgres};
 use std::sync::OnceLock;
 
 use logging::init_logger;

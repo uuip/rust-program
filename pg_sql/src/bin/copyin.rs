@@ -2,7 +2,7 @@ use chrono::Local;
 use chrono_tz::Asia::Tokyo;
 use futures::pin_mut;
 use log::info;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::sync::OnceLock;
 use tokio_postgres::binary_copy::BinaryCopyInWriter;
 use tokio_postgres::types::{ToSql, Type};

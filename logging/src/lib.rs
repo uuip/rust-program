@@ -38,8 +38,8 @@ mod env_logger {
 #[cfg(feature = "file-logger")]
 mod file_logger {
     use flexi_logger::{
-        colored_opt_format, opt_format, Cleanup, Criterion, Duplicate, FileSpec, FlexiLoggerError,
-        LoggerHandle, Naming, WriteMode,
+        Cleanup, Criterion, Duplicate, FileSpec, FlexiLoggerError, LoggerHandle, Naming, WriteMode,
+        colored_opt_format, opt_format,
     };
     use log::LevelFilter;
     pub fn init_file_logger() -> Result<LoggerHandle, FlexiLoggerError> {

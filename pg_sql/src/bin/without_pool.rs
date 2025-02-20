@@ -1,8 +1,8 @@
-use futures::{pin_mut, TryStreamExt};
+use futures::{TryStreamExt, pin_mut};
 use log::{info, warn};
 use std::sync::OnceLock;
-use tokio_postgres::types::ToSql;
 use tokio_postgres::NoTls;
+use tokio_postgres::types::ToSql;
 
 use logging::init_logger;
 use setting::Setting;

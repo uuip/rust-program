@@ -13,9 +13,5 @@ fn main() {
 #[cached(time = 10, result = false, sync_writes = true)]
 fn keyed(a: String) -> Result<usize, APIError> {
     println!("{}", a);
-    if a == "a" {
-        Ok(a.len())
-    } else {
-        Err(APIError)
-    }
+    if a == "a" { Ok(a.len()) } else { Err(APIError) }
 }

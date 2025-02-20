@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::thread::sleep;
 use std::time::Duration;
 
-use rocksdb::{IteratorMode, Options, DB};
+use rocksdb::{DB, IteratorMode, Options};
 use uuid::{Bytes, Uuid};
 
 fn main() {
