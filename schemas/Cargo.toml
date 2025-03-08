@@ -23,4 +23,4 @@ pulsar = { version = "6.3.1", default-features = false, optional = true, feature
     "tokio-runtime",
     "compression",
 ] }
-schemars = { version = "0.8.21", optional = true }
+schemars = { version = "0.8.22", optional = true }
