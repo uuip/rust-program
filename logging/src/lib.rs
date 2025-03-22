@@ -7,7 +7,7 @@ pub use self::tracing::init_tracing_logger;
 
 #[cfg(feature = "env_logger")]
 mod env_logger {
-    use chrono::Local;
+    use chrono::{Local, SecondsFormat};
     use env_logger::fmt::style::Color;
     use log::{Level, LevelFilter};
     use std::io::Write;
@@ -16,16 +16,19 @@ mod env_logger {
         env_logger::builder()
             .filter_level(LevelFilter::Debug)
             .format(|buf, record| {
-                let mut level_style = buf.default_level_style(record.level());
+                let color = match record.level() {
+                    Level::Warn => Some(Color::Ansi256(215_u8.into())),
+                    Level::Error => Some(Color::Ansi256(203_u8.into())),
+                    _ => None,
+                };
+
+                let level_style = buf.default_level_style(record.level());
                 let reset = level_style.render_reset();
-                if record.level() == Level::Warn {
-                    level_style = level_style.fg_color(Some(Color::Ansi256(206_u8.into())));
-                }
-                let level_style = level_style.render();
+                let render = level_style.fg_color(color).render();
                 writeln!(
                     buf,
-                    "{level_style}[{} | line:{:<4}|{}]: {}{reset}",
-                    Local::now().format("%H:%M:%S"),
+                    "{render}[{} | line:{:<4}|{}]: {}{reset}",
+                    Local::now().to_rfc3339_opts(SecondsFormat::Millis, false),
                     record.line().unwrap_or(0),
                     record.level(),
                     record.args()
@@ -38,8 +41,8 @@ mod env_logger {
 #[cfg(feature = "file-logger")]
 mod file_logger {
     use flexi_logger::{
-        Cleanup, Criterion, Duplicate, FileSpec, FlexiLoggerError, LoggerHandle, Naming, WriteMode,
-        colored_opt_format, opt_format,
+        colored_opt_format, opt_format, Cleanup, Criterion, Duplicate, FileSpec, FlexiLoggerError, LoggerHandle,
+        Naming, WriteMode,
     };
     use log::LevelFilter;
     pub fn init_file_logger() -> Result<LoggerHandle, FlexiLoggerError> {
