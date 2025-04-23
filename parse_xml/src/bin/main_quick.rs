@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     let rc = versions
         .into_iter()
         .filter(|x| x.channel != "beta")
-        .last()
+        .next_back()
         .ok_or_else(|| anyhow!("Failed to parse version"));
 
     println!("{:#?}", rc?);

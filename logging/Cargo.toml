@@ -11,8 +11,8 @@ license.workspace = true
 log = { workspace = true }
 chrono = { workspace = true }
 
-env_logger = { version = "0.11.7", optional = true }
-flexi_logger = { version = "0.29.8", optional = true }
+env_logger = { version = "0.11.8", optional = true }
+flexi_logger = { version = "0.30.1", optional = true }
 
 tracing = { version = "0.1.41", optional = true }
 # 使用 time 库

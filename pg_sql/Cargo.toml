@@ -9,11 +9,11 @@ chrono = { workspace = true }
 serde_json = { workspace = true }
 chrono-tz = { workspace = true }
 serde = { workspace = true }
-tokio = { version = "1.44.1", features = ["full"] }
+tokio = { version = "1.44.2", features = ["full"] }
 futures = "0.3.31"
 tokio-postgres = { version = "0.7.13", features = ["with-chrono-0_4", "with-serde_json-1"] }
 uuid = { version = "1.16.0", features = ["v4", "fast-rng"] }
-sqlx = { version = "0.8.3", features = ["runtime-tokio", "postgres", "chrono"] }
+sqlx = { version = "0.8.5", features = ["runtime-tokio", "postgres", "chrono"] }
 
 setting = { path = "../setting" }
 connection = { path = "../connection" }

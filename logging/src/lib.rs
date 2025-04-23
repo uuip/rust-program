@@ -27,10 +27,10 @@ mod env_logger {
                 let render = level_style.fg_color(color).render();
                 writeln!(
                     buf,
-                    "{render}[{} | line:{:<4}|{}]: {}{reset}",
+                    "{render}[{}|{}|line:{}]: {}{reset}",
                     Local::now().to_rfc3339_opts(SecondsFormat::Millis, false),
-                    record.line().unwrap_or(0),
                     record.level(),
+                    record.line().unwrap_or(0),
                     record.args()
                 )
             })

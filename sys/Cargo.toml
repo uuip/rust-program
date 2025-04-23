@@ -9,7 +9,7 @@ license.workspace = true
 
 [dependencies]
 num_cpus = "1.16.0"
-sysinfo = "0.33.1"
+sysinfo = "0.34.2"
 
 [lints]
 workspace = true

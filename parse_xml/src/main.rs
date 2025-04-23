@@ -39,7 +39,7 @@ fn parse_appcast(text: &str) -> Result<AppItem> {
     versions
         .into_iter()
         .filter(|x| x.channel != "beta")
-        .last()
+        .next_back()
         .ok_or_else(|| anyhow!("Failed to parse version"))
 }
 
