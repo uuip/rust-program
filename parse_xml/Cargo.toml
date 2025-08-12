@@ -6,9 +6,9 @@ edition = "2024"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-reqwest = { version = "0.12.15", features = ["json", "gzip"] }
-tokio = { version = "1.44.2", features = ["full"] }
-quick-xml = { version = "0.37.4" }
+reqwest = { version = "0.12.23", features = ["json", "gzip"] }
+tokio = { version = "1.47.1", features = ["full"] }
+quick-xml = { version = "0.38.1" }
 chrono = { workspace = true }
 roxmltree = { version = "0.20.0" }
 anyhow = { workspace = true }

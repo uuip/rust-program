@@ -24,11 +24,10 @@ async fn main() -> Result<()> {
     loop {
         match reader.read_event()? {
             Event::Start(e) => {
-                if e.name().as_ref() == b"item" {
-                    if let Ok(version) = parse_item(&mut reader) {
+                if e.name().as_ref() == b"item"
+                    && let Ok(version) = parse_item(&mut reader) {
                         versions.push(version);
                     }
-                }
             }
             Event::Eof => break,
             _ => (),

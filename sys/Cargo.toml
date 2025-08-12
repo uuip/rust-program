@@ -8,8 +8,8 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-num_cpus = "1.16.0"
-sysinfo = "0.34.2"
+num_cpus = "1.17.0"
+sysinfo = "0.37.0"
 
 [lints]
 workspace = true

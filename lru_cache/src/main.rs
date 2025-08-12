@@ -1,4 +1,5 @@
 use cached::proc_macro::cached;
+use std::time::Duration;
 
 #[derive(thiserror::Error, Debug, Clone)]
 #[error("uuiiop0")]
