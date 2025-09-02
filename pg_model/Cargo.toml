@@ -13,11 +13,11 @@ chrono = { workspace = true }
 postgres-from-row = { version = "0.5.2" }
 
 strum = { version = "0.27.2", features = ["derive"], optional = true }
-serde_with = { version = "3.14.0", optional = true }
+serde_with = { version = "3.15.0", optional = true }
 num_enum = { version = "0.7.4", optional = true }
 serde_repr = { version = "0.1.20", optional = true }
 duplicate = { version = "2.0.0", optional = true }
-postgres-types = { version = "0.2.9", features = ["derive"], optional = true }
+postgres-types = { version = "0.2.11", features = ["derive"], optional = true }
 
 [features]
 enum = [
