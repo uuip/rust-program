@@ -25,7 +25,7 @@ repository = "https://github.com/"
 license = "MIT"
 
 [workspace.dependencies]
-log = { version = "0.4.28", features = ["release_max_level_info"] }
+log = { version = "0.4.29", features = ["release_max_level_info"] }
 chrono = { version = "0.4.42", default-features = false, features = ["clock", "serde"] }
 chrono-tz = "0.10.4"
 serde = { version = "1.0.228", features = ["derive"] }

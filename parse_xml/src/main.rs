@@ -38,8 +38,7 @@ fn parse_appcast(text: &str) -> Result<AppItem> {
     versions.sort_by(|a, b| a.pub_date.cmp(&b.pub_date));
     versions
         .into_iter()
-        .filter(|x| x.channel != "beta")
-        .next_back()
+        .rfind(|x| x.channel != "beta")
         .ok_or_else(|| anyhow!("Failed to parse version"))
 }
 

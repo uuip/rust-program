@@ -37,8 +37,7 @@ async fn main() -> Result<()> {
     versions.sort_by(|a, b| a.pub_date.cmp(&b.pub_date));
     let rc = versions
         .into_iter()
-        .filter(|x| x.channel != "beta")
-        .next_back()
+        .rfind(|x| x.channel != "beta")
         .ok_or_else(|| anyhow!("Failed to parse version"));
 
     println!("{:#?}", rc?);

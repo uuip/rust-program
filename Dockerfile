@@ -4,7 +4,7 @@ COPY . .
 RUN unzip protoc-24.2-linux-x86_64.zip -d /usr/local/ && cargo install --path .
 
 
-FROM debian:12-slim
+FROM debian:13-slim
 ENV LANG C.UTF-8
 RUN sed -i 's|http://deb.debian.org|http://mirrors.ustc.edu.cn|g' /etc/apt/sources.list.d/debian.sources \
     && apt-get update && apt-get install -y libssl3 && rm -rf /var/lib/apt/lists/*
