@@ -8,8 +8,8 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-cached = "0.56.0"
-thiserror = "2.0.17"
+cached = "2.0.2"
+thiserror = "2.0.20"
 
 [lints]
 workspace = true

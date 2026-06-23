@@ -1,10 +1,10 @@
-use comfy_table::{Table, TableComponent};
+use comfy_table::Table;
 
 fn main() {
     let mut table = Table::new();
+    table.style_mut().header_separator.fill = Some('-');
+    table.style_mut().header_separator.junction = Some('-');
     table
-        .set_style(TableComponent::HeaderLines, '-')
-        .set_style(TableComponent::MiddleHeaderIntersections, '-')
         .set_header(vec!["Header1", "Header2", "Header3"])
         .add_row(vec![
             "This is a text",

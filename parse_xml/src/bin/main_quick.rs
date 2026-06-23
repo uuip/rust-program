@@ -1,7 +1,8 @@
 use anyhow::{Result, anyhow};
 use chrono::{DateTime, NaiveDateTime, ParseError, Utc};
-use quick_xml::Reader;
 use quick_xml::events::Event;
+use quick_xml::name::QName;
+use quick_xml::{Reader, XmlVersion};
 
 #[derive(Debug)]
 struct Version {
@@ -25,16 +26,17 @@ async fn main() -> Result<()> {
         match reader.read_event()? {
             Event::Start(e) => {
                 if e.name().as_ref() == b"item"
-                    && let Ok(version) = parse_item(&mut reader) {
-                        versions.push(version);
-                    }
+                    && let Ok(version) = parse_item(&mut reader)
+                {
+                    versions.push(version);
+                }
             }
             Event::Eof => break,
             _ => (),
         }
     }
     println!("{:#?}", versions.len());
-    versions.sort_by(|a, b| a.pub_date.cmp(&b.pub_date));
+    versions.sort_by_key(|a| a.pub_date);
     let rc = versions
         .into_iter()
         .rfind(|x| x.channel != "beta")
@@ -53,23 +55,28 @@ fn parse_item(reader: &mut Reader<&[u8]>) -> Result<Version> {
         match reader.read_event()? {
             Event::Start(inner) => match inner.name().as_ref() {
                 b"pubDate" => {
-                    pub_date = reader.read_text(inner.name())?.into();
+                    pub_date = read_text(reader, inner.name())?;
                 }
                 b"title" if version.is_empty() => {
-                    version = reader.read_text(inner.name())?.into();
+                    version = read_text(reader, inner.name())?;
                 }
                 b"sparkle:channel" => {
-                    channel = reader.read_text(inner.name())?.into();
+                    channel = read_text(reader, inner.name())?;
                 }
                 b"sparkle:version" => {
-                    version = reader.read_text(inner.name())?.into();
+                    version = read_text(reader, inner.name())?;
                 }
                 _ => (),
             },
             Event::Empty(e) => {
                 for attr in e.attributes().flatten() {
                     if attr.key.as_ref() == b"sparkle:version" {
-                        version = attr.decode_and_unescape_value(reader.decoder())?.into();
+                        version = attr
+                            .decoded_and_normalized_value(
+                                XmlVersion::Implicit1_0,
+                                reader.decoder(),
+                            )?
+                            .into();
                     }
                 }
             }
@@ -85,6 +92,11 @@ fn parse_item(reader: &mut Reader<&[u8]>) -> Result<Version> {
         channel,
         pub_date: parse_dt(&pub_date)?,
     })
+}
+
+fn read_text(reader: &mut Reader<&[u8]>, end: QName) -> Result<String> {
+    let raw = reader.read_text(end)?;
+    Ok(quick_xml::escape::unescape(&raw.decode()?)?.into_owned())
 }
 
 fn parse_dt(pub_date: &str) -> Result<DateTime<Utc>, ParseError> {

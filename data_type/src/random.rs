@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 
 fn learn_random() {
     let mut generator = rand::rng();

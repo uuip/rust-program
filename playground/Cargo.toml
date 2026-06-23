@@ -7,7 +7,7 @@ edition = "2024"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-futures = "0.3.31"
+futures = "0.3.34"
 anyhow = {workspace = true}
 
 setting = { path = "../setting" }

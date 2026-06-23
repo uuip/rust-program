@@ -1,3 +1,10 @@
+//! Iterates over query results with an explicit PostgreSQL server-side cursor.
+//!
+//! The implementation opens a transaction, declares a `NO SCROLL` cursor, and
+//! repeatedly executes `FETCH 1000` to load bounded batches from the server.
+//! Iteration ends when `FETCH` returns no rows; the cursor is then closed and
+//! the transaction is committed.
+
 use log::{info, warn};
 use std::sync::OnceLock;
 use tokio_postgres::NoTls;

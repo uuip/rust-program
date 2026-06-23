@@ -12,7 +12,7 @@ fn read_yaml() -> anyhow::Result<()> {
     let file = read_to_string("/Users/sharp/.config/clash/config.yaml")?;
     let data = YamlLoader::load_from_str(&file)?;
 
-    println!("{:?}", &data[0]["dns"]["nameserver"].as_str());
+    println!("{:?}", data[0]["dns"]["nameserver"].as_str());
     Ok(())
 }
 

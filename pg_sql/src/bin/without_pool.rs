@@ -1,3 +1,10 @@
+//! Streams PostgreSQL query results over a direct connection without a pool.
+//!
+//! The implementation opens one `tokio-postgres` client connection, runs its
+//! connection driver in a background task, and calls `query_raw` to obtain an
+//! asynchronous row stream. Rows are then consumed incrementally with
+//! `TryStreamExt::try_next` instead of being collected in memory first.
+
 use futures::{TryStreamExt, pin_mut};
 use log::{info, warn};
 use std::sync::OnceLock;

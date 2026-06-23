@@ -1,5 +1,4 @@
-use cached::proc_macro::cached;
-use std::time::Duration;
+use cached::cached;
 
 #[derive(thiserror::Error, Debug, Clone)]
 #[error("uuiiop0")]
@@ -11,7 +10,7 @@ fn main() {
     })
 }
 
-#[cached(time = 10, result = false)]
+#[cached(ttl = 100)]
 fn keyed(a: String) -> Result<usize, APIError> {
     println!("{}", a);
     if a == "a" { Ok(a.len()) } else { Err(APIError) }
