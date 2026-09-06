@@ -19,7 +19,7 @@ ethers = { version = "2.0.14", default-features = false, optional = true, featur
     "abigen",
     "legacy",
 ] }
-pulsar = { version = "6.8.0", default-features = false, optional = true, features = [
+pulsar = { version = "6.9.0", default-features = false, optional = true, features = [
     "tokio-runtime",
     "compression",
 ] }

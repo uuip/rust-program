@@ -7,6 +7,6 @@ edition = "2024"
 
 [dependencies]
 fastrand = "2.5.0"
-rocksdb = "0.24.0"
+rocksdb = "0.25.0"
 serde_json = { workspace = true }
-uuid = { version = "1.24.0", features = ["v4", "fast-rng"] }
+uuid = { version = "1.26.0", features = ["v4", "fast-rng"] }

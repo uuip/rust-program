@@ -26,7 +26,12 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let mut buf = BytesMut::with_capacity(16);
     buf.put_u64(n as u64);
     // &[u8] -> num
-    let new_n = buf.get_u64();
+    // buf 是 BytesMut，as_ref() 返回借用的 &[u8]，不复制字节。
+    // buf.get_u64()
+    // 会推进 buf 自己的读取位置。这里只有 8 字节，读取后 buf 就空了。
+    // buf.as_ref().get_u64()
+    // 消耗的是临时切片视图，原来的 buf 不变
+    let new_n = buf.as_ref().get_u64();
     info!("new_n={}, n_bytes={:?}", new_n, buf);
     // &[u8] -> num with byteorder
     let new_n = buf.as_ref().read_u64::<BigEndian>()?;
@@ -54,4 +59,9 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
         Local::now().signed_duration_since(now).num_seconds()
     );
     Ok(())
+}
+
+#[test]
+fn byte_conversion_example_completes() {
+    main().unwrap();
 }

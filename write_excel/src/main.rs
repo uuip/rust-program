@@ -43,10 +43,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     }
 
     let now = Local::now();
-    let d = data.axis_iter(Axis(0)).map(|x| x.to_owned());
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
-    worksheet.write_row_matrix(0, 0, d)?;
+    // let d = data.axis_iter(Axis(0)).map(|x| x.to_owned());
+    // Borrow each row and copy its values without allocating a row array.
+    let rows = data.axis_iter(Axis(0)).map(|row| row.into_iter().copied());
+    worksheet.write_row_matrix(0, 0, rows)?;
     workbook.save(filename)?;
 
     println!(

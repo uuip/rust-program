@@ -1,55 +1,16 @@
 use chrono::Local;
-use chrono_tz::Asia::Tokyo;
 use futures::future;
 use log::info;
-use serde_json::{Value, json};
 use std::sync::OnceLock;
 use tokio_postgres::types::ToSql;
-use uuid::Uuid;
 
 use connection::create_pool;
 use logging::init_logger;
 use model::TransactionPoolInsert;
+use pg_sql::make_data;
 use setting::Setting;
 
 static SETTING: OnceLock<Setting> = OnceLock::new();
-
-fn make_data() -> Result<Value, Box<dyn std::error::Error>> {
-    let t = chrono::Utc::now().with_timezone(&Tokyo);
-
-    let mut data = json!({
-        "coin_code": "JPY",
-        "pay_type": "xxPay",
-        "trxn_result": "SUCCESS",
-        "trxn_type": "general",
-        "store_id": "devtest",
-        "point": 10.0,
-        "from_user_id": "CPM1696751455",
-        "to_user_id": "920MH0OFY6c",
-        "tag_id": Uuid::new_v4().to_string(),
-        "gen_time": t.format("%Y-%m-%d %H:%M:%S%:z").to_string(),
-    });
-    data["ext_json"] = serde_json::to_value(data.to_string())?;
-
-    let data2 = json!({
-        "tx_hash": "0x77babc8124b64c6556976c847a16590600135307f1ba4cc0d2d1a7e98a55b230",
-        "gas": 50000,
-        "nonce": 50,
-        "fail_reason": None::<String>,
-        "status_code": 200,
-        "block_number": 1007334,
-        "success_time": t,
-        "request_time": t,
-    });
-    let data_obj = data.as_object_mut().unwrap();
-    data_obj.remove("trxn_result");
-    data_obj.remove("trxn_type");
-    data_obj.remove("pay_type");
-    for (k, v) in data2.as_object().unwrap() {
-        data_obj.insert(k.to_owned(), v.to_owned());
-    }
-    Ok(serde_json::to_value(data_obj)?)
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -86,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect::<Vec<String>>()
         .join(",");
 
-    let pool = create_pool(&setting.db).await?;
+    let pool = create_pool(&setting.db)?;
     let mut conn = pool.get().await?;
 
     let tr = conn.transaction().await?;

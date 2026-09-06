@@ -11,7 +11,7 @@ license.workspace = true
 version = "1.0.104"
 
 [dependencies.deadpool-postgres]
-version = "0.14.1"
+version = "0.14.2"
 
 [dependencies.tokio-postgres]
 version = "0.7.18"

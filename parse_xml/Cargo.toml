@@ -8,7 +8,7 @@ edition = "2024"
 [dependencies]
 reqwest = { version = "0.13.4", features = ["json", "gzip"] }
 tokio = { version = "1.53.1", features = ["full"] }
-quick-xml = { version = "0.41.0" }
+quick-xml = { version = "0.42.0" }
 chrono = { workspace = true }
 roxmltree = { version = "0.21.1" }
 anyhow = { workspace = true }

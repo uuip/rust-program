@@ -10,7 +10,7 @@ license.workspace = true
 [dependencies]
 anyhow = {workspace = true}
 calamine = "0.36.1"
-rust_xlsxwriter = { version = "0.97.1", features = ["zlib", "ryu"] }
+rust_xlsxwriter = { version = "0.99.0", features = ["zlib", "ryu"] }
 chrono = {workspace = true}
 fastrand = "2.5.0"
 ndarray = { version = "0.17.2", features = ["rayon"] }

@@ -18,16 +18,11 @@ pub(crate) fn parse_appcast(text: &str) -> Option<String> {
         .find(|ns| ns.name() == Some("sparkle"))
         .map(|ns| ns.uri());
 
-    let mut versions: Vec<AppItem> = doc
-        .descendants()
+    doc.descendants()
         .filter(|e| e.has_tag_name("item"))
         .filter_map(|item| parse_item(item, sparkle).ok())
-        .collect();
-
-    versions.sort_by_key(|v| v.pub_date);
-    versions
-        .into_iter()
-        .rfind(|v| v.channel != "beta")
+        .filter(|v| v.channel != "beta")
+        .max_by_key(|v| v.pub_date)
         .map(|v| {
             if v.version.contains('.') {
                 v.version
@@ -79,7 +74,7 @@ fn parse_item(item: Node, sparkle: Option<&str>) -> Result<AppItem> {
         version,
         short_version,
         channel,
-        pub_date: parse_dt(&pub_date).unwrap_or_else(|_| Utc::now()),
+        pub_date: parse_dt(&pub_date)?,
     })
 }
 
@@ -127,4 +122,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let v = parse_appcast(&rsp).unwrap_or_default();
     println!("{:#?}", v);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn invalid_dates_do_not_override_valid_releases() {
+        let xml = "<rss><channel><item><title>2.0</title><pubDate>2025-01-01T00:00:00Z</pubDate></item><item><title>1.0</title><pubDate>invalid</pubDate></item></channel></rss>";
+        assert_eq!(parse_appcast(xml).as_deref(), Some("2.0"));
+        assert_eq!(
+            parse_appcast("<rss><item><title>1.0</title></item></rss>"),
+            None
+        );
+        assert_eq!(parse_appcast("<rss>"), None);
+        assert_eq!(parse_appcast("<rss/>"), None);
+    }
+
+    #[test]
+    fn latest_release_preserves_channel_version_and_tie_rules() {
+        let xml = r#"<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"><channel>
+            <item><title>old</title><pubDate>2024-01-01T00:00:00Z</pubDate><sparkle:version>1.0</sparkle:version></item>
+            <item><title>first</title><pubDate>2025-01-01T00:00:00Z</pubDate><sparkle:version>2.0</sparkle:version></item>
+            <item><title>last</title><pubDate>2025-01-01T00:00:00Z</pubDate><enclosure sparkle:version="300" sparkle:shortVersionString="3.0"/></item>
+            <item><title>beta</title><pubDate>2026-01-01T00:00:00Z</pubDate><sparkle:version>4.0</sparkle:version><sparkle:channel>beta</sparkle:channel></item>
+        </channel></rss>"#;
+        assert_eq!(parse_appcast(xml).as_deref(), Some("3.0"));
+    }
 }

@@ -10,7 +10,7 @@ fn main() {
     })
 }
 
-#[cached(ttl = 100)]
+#[cached(ttl_secs = 100)]
 fn keyed(a: String) -> Result<usize, APIError> {
     println!("{}", a);
     if a == "a" { Ok(a.len()) } else { Err(APIError) }

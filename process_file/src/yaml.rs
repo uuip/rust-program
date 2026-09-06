@@ -10,6 +10,10 @@ fn read_yaml() -> anyhow::Result<()> {
     let file = read_to_string(r"C:\Users\sharp\AppData\Local\Programs\clash_win\config.yaml")?;
     #[cfg(target_os = "macos")]
     let file = read_to_string("/Users/sharp/.config/clash/config.yaml")?;
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    let file = read_to_string(
+        std::path::Path::new(&std::env::var("HOME")?).join(".config/clash/config.yaml"),
+    )?;
     let data = YamlLoader::load_from_str(&file)?;
 
     println!("{:?}", data[0]["dns"]["nameserver"].as_str());
@@ -26,9 +30,14 @@ fn write_yaml() -> anyhow::Result<()> {
     assert_eq!(
         output,
         r#"---
-    a: b
-    c: d"#
+a: b
+c: d"#
     );
 
     Ok(())
+}
+
+#[test]
+fn yaml_output_matches_example() {
+    write_yaml().unwrap();
 }

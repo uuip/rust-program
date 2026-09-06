@@ -76,9 +76,10 @@ pub trait PulsarSchema
 where
     Self: SerializeMessage,
     Self: DeserializeMessage,
+    Self: JsonSchema,
 {
     fn pulsar_json_schema() -> proto::Schema {
-        let schema = schema_for!(Msg);
+        let schema = schema_for!(Self);
         let schema_map = serde_json::to_value(schema).unwrap();
         let fields: Vec<_> = schema_map["properties"]
             .as_object()
@@ -107,4 +108,56 @@ where
     }
 }
 
-impl<T> PulsarSchema for T where T: SerializeMessage + DeserializeMessage {}
+impl<T> PulsarSchema for T where T: SerializeMessage + DeserializeMessage + JsonSchema {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(JsonSchema, Serialize, Deserialize)]
+    struct OtherMessage {
+        value: String,
+    }
+
+    impl SerializeMessage for OtherMessage {
+        fn serialize_message(input: Self) -> Result<producer::Message, PulsarError> {
+            Ok(producer::Message {
+                payload: serde_json::to_vec(&input).unwrap(),
+                ..Default::default()
+            })
+        }
+    }
+
+    impl DeserializeMessage for OtherMessage {
+        type Output = Result<Self, serde_json::Error>;
+
+        fn deserialize_message(payload: &Payload) -> Self::Output {
+            serde_json::from_slice(&payload.data)
+        }
+    }
+
+    #[test]
+    fn schema_uses_the_implementing_message_fields() {
+        let schema = OtherMessage::pulsar_json_schema();
+        let value: serde_json::Value = serde_json::from_slice(&schema.schema_data).unwrap();
+        assert_eq!(value["name"], "OtherMessage");
+        assert_eq!(
+            value["fields"],
+            json!([{"name": "value", "type": "string"}])
+        );
+    }
+
+    #[test]
+    fn existing_message_schema_keeps_its_fields() {
+        let schema = Msg::pulsar_json_schema();
+        let value: serde_json::Value = serde_json::from_slice(&schema.schema_data).unwrap();
+        assert_eq!(value["name"], "Msg");
+        let fields = value["fields"].as_array().unwrap();
+        assert_eq!(fields.len(), 9);
+        assert!(
+            fields
+                .iter()
+                .any(|field| field == &json!({"name": "point", "type": "float"}))
+        );
+    }
+}

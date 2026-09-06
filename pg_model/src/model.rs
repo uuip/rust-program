@@ -12,9 +12,8 @@ mod r#enum {
     use postgres_types::{FromSql, IsNull, ToSql, Type, to_sql_checked};
     use std::error::Error;
     use std::fmt::{Display, Formatter};
-    use std::str::FromStr;
     use {
-        duplicate::duplicate_item,
+        duplicate::duplicate,
         num_enum::{IntoPrimitive, TryFromPrimitive},
         serde_repr::{Deserialize_repr, Serialize_repr},
         serde_with::{DeserializeFromStr, SerializeDisplay},
@@ -22,6 +21,7 @@ mod r#enum {
 
     #[derive(
         Clone,
+        Copy,
         Debug,
         Eq,
         PartialEq,
@@ -41,42 +41,9 @@ mod r#enum {
 
     impl Display for StatusCode {
         fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-            let v: i32 = self.clone().into();
+            let v: i32 = (*self).into();
             write!(f, "{}", v)
         }
-    }
-
-    impl FromSql<'_> for StatusCode {
-        fn from_sql(ty: &Type, raw: &[u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
-            let v = i32::from_sql(ty, raw)?;
-            Self::try_from(v).map_err(Into::into)
-        }
-        fn accepts(_ty: &Type) -> bool {
-            true
-        }
-    }
-
-    impl ToSql for StatusCode {
-        fn to_sql(
-            &self,
-            ty: &Type,
-            out: &mut BytesMut,
-        ) -> Result<IsNull, Box<dyn Error + Sync + Send>>
-        where
-            Self: Sized,
-        {
-            let v: i32 = self.clone().into();
-            v.to_sql(ty, out)
-        }
-
-        fn accepts(_ty: &Type) -> bool
-        where
-            Self: Sized,
-        {
-            true
-        }
-
-        to_sql_checked!();
     }
 
     /// serde_with 将strum::Display与serde关联起来。
@@ -107,38 +74,42 @@ mod r#enum {
         Suspend,
     }
 
-    #[duplicate_item(type_name; [TokenCode]; [StatusChoice])]
-    impl FromSql<'_> for type_name {
-        fn from_sql(_ty: &Type, raw: &[u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
-            Self::from_str(std::str::from_utf8(raw)?).map_err(Into::into)
+    // Store enums as ordinary SQL integers/strings; callers use the enums directly.
+    // duplicate! expands both traits per row; decode/encode arguments use [value].
+    duplicate! {
+        [
+            enum_type       sql_type  decode(value)            encode(value);
+            [StatusCode]    [i32]     [Self::try_from(value)]   [i32::from(*value)];
+            [TokenCode]     [&str]    [value.parse::<Self>()]   [value.to_string()];
+            [StatusChoice]  [&str]    [value.parse::<Self>()]   [value.to_string()];
+        ]
+        impl FromSql<'_> for enum_type {
+            fn from_sql(ty: &Type, raw: &[u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
+                let value = <sql_type as FromSql>::from_sql(ty, raw)?;
+                decode([value]).map_err(Into::into)
+            }
+
+            fn accepts(ty: &Type) -> bool {
+                // Match the underlying SQL type before decoding.
+                <sql_type as FromSql>::accepts(ty)
+            }
         }
 
-        fn accepts(_ty: &Type) -> bool {
-            true
-        }
-    }
+        impl ToSql for enum_type {
+            fn to_sql(
+                &self,
+                ty: &Type,
+                out: &mut BytesMut,
+            ) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
+                encode([self]).to_sql(ty, out)
+            }
 
-    #[duplicate_item(type_name; [TokenCode]; [StatusChoice])]
-    impl ToSql for type_name {
-        fn to_sql(
-            &self,
-            ty: &Type,
-            out: &mut BytesMut,
-        ) -> Result<IsNull, Box<dyn Error + Sync + Send>>
-        where
-            Self: Sized,
-        {
-            self.to_string().to_sql(ty, out)
-        }
+            fn accepts(ty: &Type) -> bool {
+                <sql_type as ToSql>::accepts(ty)
+            }
 
-        fn accepts(_ty: &Type) -> bool
-        where
-            Self: Sized,
-        {
-            true
+            to_sql_checked!();
         }
-
-        to_sql_checked!();
     }
 }
 
