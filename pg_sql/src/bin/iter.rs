@@ -1,18 +1,8 @@
-//! 演示 `tokio-postgres` 迭代查询结果的两种方式。
-//!
-//! 第一种方式在事务中将预处理语句绑定到 Portal，并重复调用带行数上限的
-//! `query_portal_raw`。每次调用以流的方式消费一个受限批次，直到当前批次的
-//! 行数少于请求上限。第二种方式调用 `query_raw`，并通过 `StreamExt::next`
-//! 直接消费返回的异步行流。
-//!
-//! `query_raw` 不会先把完整结果集加载到应用程序内存后再进行迭代。它返回
-//! `RowStream`，驱动从 PostgreSQL 接收到行后逐行产出。相比之下，`query`
-//! 是一个便捷封装，它通过 `try_collect` 耗尽同一个流，并将所有行放入
-//! `Vec<Row>` 后返回。`query_raw` 不会限制服务端单次执行返回的行数；如果
-//! 必须将每次服务端执行限制为固定批次，应使用 Portal 实现。
+//! 逐行读取用 `query_raw`；需要控制服务端每批返回行数时，用事务内的 `query_portal_raw`。
+//! 两者均返回行流，通过 `try_next().await?` 读取并向调用方返回错误。
 
 use chrono::Local;
-use futures::{StreamExt, pin_mut};
+use futures::{TryStreamExt, pin_mut};
 use log::info;
 use std::sync::OnceLock;
 
@@ -36,14 +26,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let now = Local::now();
     let tr = conn.transaction().await?;
+    // Portal 保存本次查询的参数和执行进度，只能在创建它的连接、事务中使用。
     let portal = tr.bind(&statement, &[&StatusCode::Success]).await?;
     loop {
         let max_rows = 2;
+        // 继续同一个 Portal，每次最多返回 max_rows 行，不会从头重新执行查询。
+        // max_rows 必须为正数才限制批次大小；0 或负数表示不限制返回行数。
         let rows = tr.query_portal_raw(&portal, max_rows).await?;
         let mut count = 0;
+        // RowStream 是 !Unpin，不能直接调用要求 Unpin 的 try_next()。
+        // pin_mut! 保持底层流的位置不变，并生成满足接口约束的 Pin<&mut _>。
         pin_mut!(rows);
-        while let Some(row) = rows.next().await {
-            let row = row?;
+        while let Some(row) = rows.try_next().await? {
             count += 1;
             let o: TransactionPool = TransactionPool::from_row(&row);
             info!("{}", o.tag_id);
@@ -60,9 +54,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let now = Local::now();
     let params = &[&StatusCode::Success];
+    // query_raw 发起一次新查询，返回整个查询的行流；逐行消费，但没有服务端分批上限。
+    // 它无需显式创建事务；与 query_portal_raw 一样返回流，不会先收集成 Vec<Row>。
     let rows = conn.query_raw(&statement, params).await?;
     pin_mut!(rows);
-    while let Some(Ok(row)) = rows.next().await {
+    while let Some(row) = rows.try_next().await? {
         let o: TransactionPool = TransactionPool::from_row(&row);
         info!("{}", o.status_code);
     }

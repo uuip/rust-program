@@ -1,9 +1,5 @@
-//! Iterates over query results with an explicit PostgreSQL server-side cursor.
-//!
-//! The implementation opens a transaction, declares a `NO SCROLL` cursor, and
-//! repeatedly executes `FETCH 1000` to load bounded batches from the server.
-//! Iteration ends when `FETCH` returns no rows; the cursor is then closed and
-//! the transaction is committed.
+//! 在事务中声明 PostgreSQL 服务端游标，通过 `FETCH 1000` 分批读取。
+//! 返回空批次后关闭游标并提交事务。
 
 use log::{info, warn};
 use std::sync::OnceLock;
@@ -32,7 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let now = std::time::SystemTime::now();
     let tr = client.build_transaction().start().await?;
-    let _ = tr.execute(&stmt, &[]).await;
+    tr.execute(&stmt, &[]).await?;
     loop {
         let rows = tr.query("FETCH 1000 FROM iterquery", &[]).await?;
         if rows.is_empty() {
@@ -40,8 +36,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         }
         for _ in rows {}
     }
-    let _ = tr.execute(&format!("close {cursor_name}"), &[]).await;
-    let _ = tr.commit().await;
+    tr.execute(&format!("close {cursor_name}"), &[]).await?;
+    tr.commit().await?;
     warn!("用时{:.2?}秒", now.elapsed()?.as_secs_f32());
     Ok(())
 }

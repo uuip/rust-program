@@ -64,8 +64,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ))
         .await?;
     let tr = conn.transaction().await?;
+    // Sink 是异步写入端：程序向它发送字节，PostgreSQL 通过 COPY FROM STDIN 接收。
+    // writer 负责把每行的 Rust 字段编码成 COPY 二进制格式，再交给 sink。
     let sink = tr.copy_in(&statement).await?;
     let writer = BinaryCopyInWriter::new(sink, &fields_type);
+    // pin_mut! 固定底层 writer 的位置，并用同名的 Pin<&mut _> 包装它，
+    // 满足异步 write/finish 接口对固定可变引用的要求；它不会启动任务或加锁。
     pin_mut!(writer);
 
     for _ in 0..10 {
@@ -89,8 +93,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             &m.to_user_id,
             &m.tx_hash,
         ];
+        // as_mut() 临时重新借用固定引用，让下一轮仍能使用 writer。
+        // write 一次编码一行；内部已有缓冲，不是每写一行就等待数据库确认。
         writer.as_mut().write(&params).await?;
     }
+    // 发送剩余缓冲和 COPY 结束标记，等待数据库确认；不能省略。
     writer.finish().await?;
     tr.commit().await?;
 

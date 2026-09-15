@@ -80,7 +80,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tr.execute_raw(&statement, params)
     });
     let now = Local::now();
-    let _ = future::try_join_all(tasks).await;
+    future::try_join_all(tasks).await?;
     tr.commit().await?;
 
     info!(

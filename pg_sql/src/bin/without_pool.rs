@@ -1,9 +1,5 @@
-//! Streams PostgreSQL query results over a direct connection without a pool.
-//!
-//! The implementation opens one `tokio-postgres` client connection, runs its
-//! connection driver in a background task, and calls `query_raw` to obtain an
-//! asynchronous row stream. Rows are then consumed incrementally with
-//! `TryStreamExt::try_next` instead of being collected in memory first.
+//! 不使用连接池，直接连接 PostgreSQL，并在后台驱动连接。
+//! 通过 `query_raw` 获取行流，使用 `try_next().await?` 逐行读取并返回错误。
 
 use futures::{TryStreamExt, pin_mut};
 use log::{info, warn};
@@ -33,6 +29,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let rst = client
         .query_raw("select * from ship_transfer", params)
         .await?;
+    // RowStream 是 !Unpin，直接调用要求 Unpin 的 try_next() 会编译失败。
+    // pin_mut! 固定底层流并生成 Pin<&mut _>，使引用满足接口约束。
     pin_mut!(rst);
     while let Some(row) = rst.try_next().await? {
         if count == 0 {

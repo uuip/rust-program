@@ -1,5 +1,5 @@
 use chrono::Local;
-use futures::{StreamExt, pin_mut};
+use futures::{TryStreamExt, pin_mut};
 use log::info;
 use std::sync::OnceLock;
 use tokio_postgres::binary_copy::BinaryCopyOutStream;
@@ -61,10 +61,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ))
         .await?;
     let tr = conn.transaction().await?;
+    // copy_out 返回异步读取流 Stream（数据库 → 程序）；这里的 sink 变量实际是读取端。
     let sink = tr.copy_out(&statement).await?;
     let reader = BinaryCopyOutStream::new(sink, &fields_type);
+    // reader 包含 !Unpin 的 COPY 流，不能直接满足 try_next() 的 Unpin 约束。
+    // pin_mut! 生成 Pin<&mut _>，让可移动的引用满足约束，同时保持底层流的位置不变。
     pin_mut!(reader);
-    while let Some(Ok(row)) = reader.next().await {
+    while let Some(row) = reader.try_next().await? {
         let tag_id: i64 = row.get(0);
         info!("{tag_id:?}");
     }

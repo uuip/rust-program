@@ -1,9 +1,5 @@
-//! Iterates over query results through SQLx's asynchronous stream interface.
-//!
-//! `query_as` maps each PostgreSQL row to `Transaction`, while `fetch` returns
-//! a lazy stream backed by the connection pool. The implementation advances
-//! that stream with `TryStreamExt::try_next`, propagating either query or row
-//! decoding errors as soon as they occur.
+//! 使用 SQLx 的 `query_as` 将结果映射为 Transaction，并通过 `fetch` 逐行读取。
+//! `try_next().await?` 将查询或行解码错误返回给调用方。
 
 #![allow(non_snake_case)]
 use futures::TryStreamExt;

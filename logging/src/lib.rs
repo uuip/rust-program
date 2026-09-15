@@ -8,26 +8,23 @@ pub use self::tracing::init_tracing_logger;
 #[cfg(feature = "env_logger")]
 mod env_logger {
     use chrono::{Local, SecondsFormat};
-    use env_logger::fmt::style::Color;
-    use log::{Level, LevelFilter};
+    use env_logger::{Builder, Env};
+    use log::Level;
     use std::io::Write;
 
     pub fn init_logger() {
-        env_logger::builder()
-            .filter_level(LevelFilter::Debug)
+        Builder::from_env(Env::default().default_filter_or("debug"))
             .format(|buf, record| {
-                let color = match record.level() {
-                    Level::Warn => Some(Color::Ansi256(215_u8.into())),
-                    Level::Error => Some(Color::Ansi256(203_u8.into())),
-                    _ => None,
+                let style = buf.default_level_style(record.level());
+                let style = match record.level() {
+                    Level::Warn => style.fg_color(Some(215.into())),
+                    Level::Error => style.fg_color(Some(203.into())),
+                    _ => style,
                 };
 
-                let level_style = buf.default_level_style(record.level());
-                let reset = level_style.render_reset();
-                let render = level_style.fg_color(color).render();
                 writeln!(
                     buf,
-                    "{render}[{} {} line:{}] {}{reset}",
+                    "{style}[{} {} line:{}] {}{style:#}",
                     Local::now().to_rfc3339_opts(SecondsFormat::Millis, false),
                     record.level(),
                     record.line().unwrap_or(0),
